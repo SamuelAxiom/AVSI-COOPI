@@ -38,7 +38,7 @@ def load_data():
 	
 	return data,correl,quest,codes,sankey
 
-
+data,correl,questions,codes,sankey=load_data()
 
 #st.write(sankey)
 #st.dataframe(correl)
@@ -233,7 +233,9 @@ img2 = Image.open("logoCOOPI.png")
 
 def main():	
 	
-	data,correl,questions,codes,sankey=load_data()
+	
+	
+	#st.write(codes)
 	
 	st.sidebar.image(img1,width=200)
 	st.sidebar.title("")
@@ -568,7 +570,7 @@ def main():
 		text=pickle.load( open( "text.p", "rb" ) )
 		text2=[questions[i] for i in text]
 		
-		st.write(questions)
+		#st.write(questions)
 		
 		x, y = np.ogrid[100:500, :600]
 		mask = ((x - 300)/2) ** 2 + ((y - 300)/3) ** 2 > 100 ** 2
