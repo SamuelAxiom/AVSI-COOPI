@@ -38,3 +38,9 @@ Unnamed: 0	list name	type	label	coding	color
 36	B19	cat	Pest management		
 37	District	to code	Baidoa	1.0	blue
 38	District	to code	Doolow	0.0	green
+	E6_Boreholes_village		0	0	red
+	E6_Boreholes_village		1	1	orange
+	E6_Boreholes_village		2	2	yellow
+	E6_Boreholes_village		3	3	lightgreen
+	E6_Boreholes_village		4	4	green
+	E6_Boreholes_village		5	5	darkgreen

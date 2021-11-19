@@ -27,17 +27,22 @@ st.set_page_config(layout="wide")
 @st.cache
 def load_data():
 	data = pd.read_csv('viz.csv',sep='\t')
+	data.drop([i for i in data if 'Unnamed' in i],axis=1,inplace=True)
 	correl=pd.read_csv('graphs.csv',sep='\t')
 	questions=pd.read_csv('questions.csv',sep='\t')
 	questions.drop([i for i in questions.columns if 'Unnamed' in i],axis=1,inplace=True)
 	quest=questions.iloc[3].to_dict()
+	questions=questions.T
+	sankey=questions[questions[1]=='sankey'].index.tolist()
 	codes=pd.read_csv('codes.csv',index_col=None,sep='\t').dropna(how='any',subset=['color'])
-	return data,correl,quest,codes
+	
+	return data,correl,quest,codes,sankey
 
-data,correl,questions,codes=load_data()
 
-st.dataframe(correl)
-st.write(data.columns)
+
+#st.write(sankey)
+#st.dataframe(correl)
+#st.write(data.columns)
 #st.write(correl.shape)
 
 def sankey_graph(data,L,height=600,width=1600):
@@ -122,41 +127,50 @@ def sankey_graph(data,L,height=600,width=1600):
 
 
 def count2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
+	
+	dataf[ordonnée]=dataf[ordonnée].apply(lambda x:str(x))
+	agg=dataf[[abscisse,ordonnée]].groupby(by=[abscisse,ordonnée]).aggregate({abscisse:'count'}).unstack().fillna(0)
+	agg2=agg.T/agg.T.sum()
+	agg2=agg2.T*100
+	agg2=agg2.astype(int)
     
-    agg=dataf[[abscisse,ordonnée]].groupby(by=[abscisse,ordonnée]).aggregate({abscisse:'count'}).unstack().fillna(0)
-    agg2=agg.T/agg.T.sum()
-    agg2=agg2.T*100
-    agg2=agg2.astype(int)
+	if abscisse=='dam ':
+		agg=agg.reindex(['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])
+		agg2=agg2.reindex(['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])
     
-    if abscisse=='MAHFP ':
-    	agg=agg.reindex(['january','february','march','april','may','june','july','august','september','october','november','december'])
-    	agg2=agg2.reindex(['january','february','march','april','may','june','july','august','september','october','november','december'])
+	x=agg.index
     
-    x=agg.index
-    
-    if ordonnée.split(' ')[0] in codes['list name'].values:
-        colors_code=codes[codes['list name']==ordonnée.split(' ')[0]].sort_values(['coding'])
-        labels=colors_code['label'].tolist()
-        colors=colors_code['color'].tolist()
-        fig = go.Figure()
-        #st.write(labels,colors)
-        for i in range(len(labels)):
-            if labels[i] in dataf[ordonnée].unique():
-                fig.add_trace(go.Bar(x=x, y=agg[(abscisse,labels[i])], name=labels[i],\
-                           marker_color=colors[i].lower(),customdata=agg2[(abscisse,labels[i])],textposition="inside",\
+	#st.write(agg)
+	#st.write(agg2)
+	
+	if ordonnée.split(' ')[0] in codes['list name'].values:
+		#st.write('on est là')
+		colors_code=codes[codes['list name']==ordonnée.split(' ')[0]].sort_values(['coding'])
+		labels=colors_code['label'].tolist()
+		colors=colors_code['color'].tolist()
+		fig = go.Figure()
+		#st.write(labels,colors)
+		#st.write(x)
+		for i in range(len(labels)):
+			if labels[i] in dataf[ordonnée].unique():
+				#st.write(labels[i])
+				#st.write(agg.columns)
+				#st.write(agg[(abscisse,str(labels[i]))])
+				fig.add_trace(go.Bar(x=x, y=agg[(abscisse,str(labels[i]))], name=str(labels[i]),\
+                           marker_color=colors[i].lower(),customdata=agg2[(abscisse,str(labels[i]))],textposition="inside",\
                            texttemplate="%{customdata} %",textfont_color="black"))
         
-    else:
-        fig = go.Figure(go.Bar(x=x, y=agg.iloc[:,0], name=agg.columns.tolist()[0][1],marker_color='green',customdata=agg2.iloc[:,0],textposition="inside",\
+	else:
+		fig = go.Figure(go.Bar(x=x, y=agg.iloc[:,0], name=agg.columns.tolist()[0][1],marker_color='green',customdata=agg2.iloc[:,0],textposition="inside",\
                            texttemplate="%{customdata} %",textfont_color="black"))
-        for i in range(len(agg.columns)-1):
-            fig.add_trace(go.Bar(x=x, y=agg.iloc[:,i+1], name=agg.columns.tolist()[i+1][1],customdata=agg2.iloc[:,i+1],textposition="inside",\
+		for i in range(len(agg.columns)-1):
+			fig.add_trace(go.Bar(x=x, y=agg.iloc[:,i+1], name=agg.columns.tolist()[i+1][1],customdata=agg2.iloc[:,i+1],textposition="inside",\
                            texttemplate="%{customdata} %",textfont_color="black"))
     
-    fig.update_layout(barmode='relative', \
+	fig.update_layout(barmode='relative', \
                   xaxis={'title':xaxis,'title_font':{'size':18}},\
                   yaxis={'title':'Persons','title_font':{'size':18}})
-    fig.update_layout(legend_title=legendtitle,legend=dict(orientation="h",
+	fig.update_layout(legend_title=legendtitle,legend=dict(orientation="h",
         yanchor="bottom",
         y=1.02,
         xanchor="right",
@@ -164,61 +178,82 @@ def count2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
     ))
     #fig.update_layout(title_text=title)
     
-    return fig
+	return fig
 
 def pourcent2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
     
-    agg2=dataf[[abscisse,ordonnée]].groupby(by=[abscisse,ordonnée]).aggregate({abscisse:'count'}).unstack().fillna(0)
-    agg=agg2.T/agg2.T.sum()
-    agg=agg.T.round(2)*100
-    x=agg2.index
+	agg2=dataf[[abscisse,ordonnée]].groupby(by=[abscisse,ordonnée]).aggregate({abscisse:'count'}).unstack().fillna(0)
+	agg=agg2.T/agg2.T.sum()
+	agg=agg.T.round(2)*100
     
-    if ordonnée.split(' ')[0] in codes['list name'].values:
-        colors_code=codes[codes['list name']==ordonnée.split(' ')[0]].sort_values(['coding'])
-        labels=colors_code['label'].tolist()
-        colors=colors_code['color'].tolist()
-        fig = go.Figure()
+    
+	if abscisse=='dam ':
+		agg=agg.reindex(['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])
+		agg2=agg2.reindex(['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])
+    
+	x=agg2.index
+    
+	if ordonnée.split(' ')[0] in codes['list name'].values:
+		colors_code=codes[codes['list name']==ordonnée.split(' ')[0]].sort_values(['coding'])
+		labels=colors_code['label'].tolist()
+		colors=colors_code['color'].tolist()
+		fig = go.Figure()
         
-        for i in range(len(labels)):
-            if labels[i] in dataf[ordonnée].unique():
-                fig.add_trace(go.Bar(x=x, y=agg[(abscisse,labels[i])], name=labels[i],\
+		for i in range(len(labels)):
+			if labels[i] in dataf[ordonnée].unique():
+				fig.add_trace(go.Bar(x=x, y=agg[(abscisse,labels[i])], name=labels[i],\
                            marker_color=colors[i].lower(),customdata=agg2[(abscisse,labels[i])],textposition="inside",\
                            texttemplate="%{customdata} persons",textfont_color="black"))
         
-    else:
+	else:
         #st.write(agg)
         #st.write(agg2)
-        fig = go.Figure(go.Bar(x=x, y=agg.iloc[:,0], name=agg.columns.tolist()[0][1],marker_color='green',customdata=agg2.iloc[:,0],textposition="inside",\
+		fig = go.Figure(go.Bar(x=x, y=agg.iloc[:,0], name=agg.columns.tolist()[0][1],marker_color='green',customdata=agg2.iloc[:,0],textposition="inside",\
                            texttemplate="%{customdata} persons",textfont_color="black"))
-        for i in range(len(agg.columns)-1):
-            fig.add_trace(go.Bar(x=x, y=agg.iloc[:,i+1], name=agg.columns.tolist()[i+1][1],customdata=agg2.iloc[:,i+1],textposition="inside",\
+		for i in range(len(agg.columns)-1):
+			fig.add_trace(go.Bar(x=x, y=agg.iloc[:,i+1], name=agg.columns.tolist()[i+1][1],customdata=agg2.iloc[:,i+1],textposition="inside",\
                            texttemplate="%{customdata} persons",textfont_color="black"))
     
-    fig.update_layout(barmode='relative', \
+	fig.update_layout(barmode='relative', \
                   xaxis={'title':xaxis,'title_font':{'size':18}},\
                   yaxis={'title':'Pourcentage','title_font':{'size':18}})
-    fig.update_layout(legend_title=legendtitle,legend=dict(orientation='h',
+	fig.update_layout(legend_title=legendtitle,legend=dict(orientation='h',
         yanchor="bottom",
         y=1.02,
         xanchor="right",
         x=1.01,font=dict(size=18),title=dict(font=dict(size=18))
     ))
     #fig.update_layout(title_text=title)    
-    return fig
+	return fig
 
 
 img1 = Image.open("logoAxiom.png")
 img2 = Image.open("logoCOOPI.png")
+#img3 = Image.open("logoAVSI.png")
 
 def main():	
+	
+	data,correl,questions,codes,sankey=load_data()
 	
 	st.sidebar.image(img1,width=200)
 	st.sidebar.title("")
 	st.sidebar.title("")
-	topic = st.sidebar.radio('What do you want to do ?',('Display machine learning results','Display maps','Display correlations','Display Sankey Graphs'))
+	database=st.sidebar.selectbox('',['Choose your database','COOPI','AVSI'])
 	
 	title1, title3 = st.columns([9,2])
-	title3.image(img2)
+
+	
+	if database=='COOPI':
+		topic = st.sidebar.radio('What do you want to do ?',('Display machine learning results','Display correlations',\
+		'Display Sankey Graphs','Display Wordclouds'))
+		title3.image(img2)
+	elif database=='AVSI':
+		topic = st.sidebar.radio('What do you want to do ?',('Display correlations','Display Sankey Graphs','Display Wordclouds'))
+		#title3.image(img3)
+	else:
+		topic=''
+	
+		
 	
 	if topic=='Display machine learning results':
 		
@@ -255,7 +290,7 @@ def main():
 		st.write('We can see that the main parameter for feeling agricultural productivity has increased as result of the project are the fact to have received equipment and agricultural support from COOPI. This seems to show the effectiveness of these two activities')
 		st.write('We see also that beeing a beneficiary of CFW activities also tends to increase the probability to fees that the productivity has increased howeve, we can see below that when people have to work a lot of days as CFW it seems to reduce the productivity. It might then be interesting to multiply the number of beneficiary in CFW and reduce the number of working days if the beneficiary are farmers.')
 		st.write('Also we see that the increase on productivity is mainly for cowpeas, Maize and Tomatoes. And that when people have large surfaces they are more likely to have had the feeling that their productivity had increased.')
-		st.write('It seems that those having access to latrines are more likely to have had increased productivity...')
+		st.write('It seems that those not having access to latrines are more likely to have had increased productivity (probably because they are more likely to be host outside of central village')
 		
 		
 		st.markdown("""---""")	
@@ -267,6 +302,7 @@ def main():
 	elif topic=='Display correlations':	
 		
 		title1.title('Main correlations uncovered from the database')
+		st.write('Note: There are huge differences between Baidoa and Doloow as shown below. In this regards, the correlations need to be taken carefuly and could sometimes just come from thee fact that the categories are just coming from different regions.')
 		continues=pickle.load( open( "cont_feat.p", "rb" ) )
 		cat_cols=pickle.load( open( "cat_cols.p", "rb" ) )
 		
@@ -275,7 +311,7 @@ def main():
 		
 		#st.write(quest)
 		#st.write(codes)
-		st.write(cat_cols)
+		#st.write(cat_cols)
 		
 		#st.write(data['assistancetype'].value_counts())
 		
@@ -298,7 +334,7 @@ def main():
 				
 				
 				#st.write(quest.iloc[i]['variable_x']+'##')
-				st.write('in cat cols: ',quest.iloc[i]['variable_x'] in cat_cols)
+				#st.write('in cat cols: ',quest.iloc[i]['variable_x'] in cat_cols)
 				
 			
 								
@@ -354,8 +390,6 @@ def main():
 					
 				elif quest.iloc[i]['graphtype']=='violin':
 					
-					
-					
 					fig = go.Figure()
 				
 					if quest.iloc[i]['variable_x'].split(' ')[0] in codes['list name'].unique():
@@ -363,33 +397,50 @@ def main():
 					
 					else:
 						categs = df[quest.iloc[i]['variable_x']].unique()
-					for categ in categs:
-					    fig.add_trace(go.Violin(x=df[quest.iloc[i]['variable_x']][df[quest.iloc[i]['variable_x']] == categ],
-	                            		y=df[quest.iloc[i]['variable_y']][df[quest.iloc[i]['variable_x']] == categ],
-	                            		name=categ,
-	                            		box_visible=True,
-                           			meanline_visible=True,points="all",))
+					
+					if quest.iloc[i]['colorcolumns']!=quest.iloc[i]['colorcolumns']:
+					
+						for categ in categs:
+						    fig.add_trace(go.Violin(x=df[quest.iloc[i]['variable_x']][df[quest.iloc[i]['variable_x']] == categ],
+		                            		y=df[quest.iloc[i]['variable_y']][df[quest.iloc[i]['variable_x']] == categ],
+		                            		name=categ,
+		                            		box_visible=True,
+        	                   			meanline_visible=True,points="all",))
+					else: 
+						for categ in categs:
+						    fig.add_trace(go.Violin(x=df[quest.iloc[i]['variable_x']][df[quest.iloc[i]['variable_x']] == categ],
+		                            		y=df[quest.iloc[i]['variable_y']][df[quest.iloc[i]['variable_x']] == categ],
+		                            		name=categ,color='colorcolumns',
+		                            		box_visible=True,
+        	                   			meanline_visible=True,points="all",))
+					
+					
 					fig.update_layout(showlegend=False)
 					fig.update_yaxes(range=[-0.1, df[quest.iloc[i]['variable_y']].max()+1],title=quest.iloc[i]['ytitle'])
 					k+=1
 					
-					if len(quest[quest['graphtype']=='violin'])==2:
+					
+					
+					if len(quest[quest['graphtype']=='violin'])>2:
 						
-						if k==1:
+						if k%2==1:
 							col1.subheader(quest.iloc[i]['title'])
 							col1.plotly_chart(fig,use_container_width=True)
-							col1.write(quest.iloc[i]['description'])
+							
 						else:
 							col2.subheader(quest.iloc[i]['title'])
 							col2.plotly_chart(fig,use_container_width=True)
-							col2.write(quest.iloc[i]['description'])
+							
 					else:
 						st.subheader(quest.iloc[i]['title'])
 						st.plotly_chart(fig,use_container_width=True)
-						st.write(quest.iloc[i]['description'])
+					st.write(quest.iloc[i]['description'])
 					
 									
 				elif quest.iloc[i]['graphtype']=='bar':
+					
+					#st.write(df[quest.iloc[i]['variable_y']].dtype)
+					
 					
 					st.subheader(quest.iloc[i]['title'])
 				
@@ -409,43 +460,187 @@ def main():
 						
 	
 			
+	
+		
 	elif topic=='Display Sankey Graphs':
 	
-		title1.title('Sankey Diagrams')
+		title1.title('Visuals for questions related to cultures (questions C3 to C17)')
 		st.title('')
-		sankey=[i for i in data.columns if data[i].dtype=='object' and i!='nan']
 		
 		
-		sank=data[sankey].fillna('Unknown').copy()
+		crops=[i for i in data if i[0]=='B' and i[:3] not in ['B1_','B20','B19']]
+		#st.write(sankey)	
 		
+		data_all=data[sankey].copy()
+		
+		#st.write()
+		
+		rest=[i for i in sankey if i not in crops]
+		sankeyseeds=sankey[:65]
+		sank=data[sankeyseeds]
+		
+		cowpea=data_all[rest+[i for i in crops if 'Cowpea' in i]].copy()
+		sorghum=data_all[rest+[i for i in crops if 'Sorghum' in i]].copy()
+		melon=data_all[rest+[i for i in crops if 'Melon' in i]].copy()
+		maize=data_all[rest+[i for i in crops if 'Maize' in i]].copy()
+		cabbage=data_all[rest+[i for i in crops if 'Cabbage' in i]].copy()
+		tomatoes=data_all[rest+[i for i in crops if 'Tomatoes' in i]].copy()
+		other=data_all[rest+[i for i in crops if 'other' in i]].copy()
+		
+		#st.write(cowpea)
+		
+		colonnes=['Seeds Planted','Type of seeds','Origin of seeds','Did you have adequate/enough seed',\
+          'Origin of fertilizer']
+		for i in [cowpea,sorghum,melon,maize,cabbage,tomatoes,other]:
+    			i.columns=rest+colonnes
+		cowpea=cowpea[cowpea['Seeds Planted']=='Yes']
+		sorghum=sorghum[sorghum['Seeds Planted']=='Yes']
+		melon=melon[melon['Seeds Planted']=='Yes']
+		maize=maize[maize['Seeds Planted']=='Yes']
+		cabbage=cabbage[cabbage['Seeds Planted']=='Yes']
+		tomatoes=tomatoes[tomatoes['Seeds Planted']=='Yes']
+		other=other[other['Seeds Planted']=='Yes']
+		
+		cowpea['Seeds Planted']=cowpea['Seeds Planted'].apply(lambda x: 'Cowpea')
+		sorghum['Seeds Planted']=sorghum['Seeds Planted'].apply(lambda x: 'Sorghum')
+		melon['Seeds Planted']=melon['Seeds Planted'].apply(lambda x: 'Melon')
+		maize['Seeds Planted']=maize['Seeds Planted'].apply(lambda x: 'Maize')
+		cabbage['Seeds Planted']=cabbage['Seeds Planted'].apply(lambda x: 'Cabbage')
+		tomatoes['Seeds Planted']=tomatoes['Seeds Planted'].apply(lambda x: 'Tomatoes')
+		other['Seeds Planted']=other['Seeds Planted'].apply(lambda x: 'Other')
+		
+		sank=pd.DataFrame(columns=rest+colonnes)
+		for i in [cowpea,sorghum,melon,maize,cabbage,tomatoes,other]:
+		    sank=sank.append(i)
 		sank['ones']=np.ones(len(sank))
 		
-		st.title('Main needs identified')
+		st.title('Some examples')
 		
-		fig=sankey_graph(sank,['main_need','second_need','third_need'],height=600,width=1500)
+		st.markdown("""---""")
+		st.write('Origin of Seeds - Type of Seeds - '+questions['productivity_increased'])
+		fig=sankey_graph(sank,['Origin of seeds','Type of seeds','Type of seeds'],height=600,width=1500)
 		fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
 		
-		st.write(' - '.join(['Main need','Second main need','Third main need']))
 		st.plotly_chart(fig,use_container_width=True)
+		st.write('We can see that improved seeds and seeds received from AVSI improved the productivity')
 		
+		st.markdown("""---""")
+		st.write(questions['B20_AVSI_equip']+' - '+questions['A15 Agricultural support']+' - '+questions['productivity_increased'])
+		fig=sankey_graph(sank,['B20_AVSI_equip','A15 Agricultural support','productivity_increased'],height=600,width=1500)
+		fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
+		
+		st.plotly_chart(fig,use_container_width=True)
+		st.write('We can see that almost all those who received agricultural support and/or equipments improved the productivity')
 		
 		
 		if st.checkbox('Design my own Sankey Graph'):
 			
 			st.markdown("""---""")
-			selection=st.multiselect('Select features you want to see in the order you want them to appear',\
-			 [questions[i] for i in sank.columns if i!='ones'])
-			feats=[i for i in questions if questions[i] in selection]
+			feats=st.multiselect('Select features you want to see in the order you want them to appear', [questions[i] for i in rest]+colonnes)
 			
 			if len(feats)>=2:
-				st.write(' - '.join(selection))
-				fig3=sankey_graph(sank,feats,height=600,width=1500)
+				st.write(' - '.join(feats))
+				a=False
+				for i in feats:
+					if i in colonnes:
+						a=True
+				if a:
+					df=sank.copy()
+				else:
+					df=data_all
+				
+				features=[]
+				for i in feats:
+					if i in colonnes:
+						features.append(i)
+					else:
+						features.append([n for n in questions if questions[n]==i][0])
+				
+				#st.write(features)
+				
+				fig3=sankey_graph(df,features,height=600,width=1500)
 				fig3.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
-				st.plotly_chart(fig3,use_container_width=True)	
+				st.plotly_chart(fig3,use_container_width=True)
 		
 		
+	elif topic=='Display Wordclouds':		
+		continues=pickle.load( open( "cont_feat.p", "rb" ) )
+		text=pickle.load( open( "text.p", "rb" ) )
+		text2=[questions[i] for i in text]
 		
+		st.write(questions)
+		
+		x, y = np.ogrid[100:500, :600]
+		mask = ((x - 300)/2) ** 2 + ((y - 300)/3) ** 2 > 100 ** 2
+		mask = 255 * mask.astype(int)
+	
+		courses,child=False,False
+		title1.title('Wordclouds for open questions')
+		
+		feature=st.sidebar.selectbox('Select the question for which you would like to visualize wordclouds of answers',[i for i in text2])
+		
+		var=[i for i in questions if questions[i]==feature][0]
+		
+		col1, col2, col3 = st.columns([1,4,1])
+		col2.title('Wordcloud from question:')
+		col2.title(feature)
+				
+		
+		corpus=' '.join(data[var].apply(lambda x:'' if x=='0' else x))
+		corpus=re.sub('[^A-Za-z ]',' ', corpus)
+		corpus=re.sub('\s+',' ', corpus)
+		corpus=corpus.lower()
+		
+		col3.title('')
+		col3.title('')
+		col3.title('')
+		sw=col3.multiselect('Select words you would like to remove from the wordcloud \n\n', [i[0] for i in Counter(corpus.split(' ')).most_common() if i[0] not in STOPWORDS][:20])
+		
+		if corpus==' ':
+	    		corpus='No_response'
+		else:
+			corpus=' '.join([i for i in corpus.split(' ') if i not in sw])
+		
+		wc = WordCloud(background_color="#0E1117", repeat=False, mask=mask)		
+		wc.generate(corpus)
+		col2.image(wc.to_array(), use_column_width = True)	
+		
+		if col2.checkbox('Would you like to filter Wordcloud according to other questions'):
+		
+			feature2=col2.selectbox('Select one question to filter the wordcloud',[questions[i] for i in questions if i not in text])		
+			filter2=[i for i in questions if questions[i]==feature2][0]
 			
+			if filter2 in continues:
+				mini=int(data[filter2].fillna(0).min())
+				maxi=int(data[filter2].fillna(0).max())
+				minimum=col2.slider('Select the minimum value you want to visulize', min_value=mini,max_value=maxi)
+				maximum=col2.slider('Select the maximum value you want to visulize', min_value=minimum,max_value=maxi+1)
+				df=data[(data[filter2]>=minimum)&(data[filter2]<=maximum)].copy()	
+				
+			
+			else:
+				filter3=col2.multiselect('Select the responses you want to include', [i for i in data[filter2].unique()])
+				df=data[data[filter2].isin(filter3)].copy()
+			
+			corpus=' '.join(df[var].apply(lambda x:'' if x=='0' else x))
+			corpus=re.sub('[^A-Za-z ]',' ', corpus)
+			corpus=re.sub('\s+',' ', corpus)
+			corpus=corpus.lower()
+			
+			if corpus==' ' or corpus=='':
+    				corpus='No_response'
+			else:
+				corpus=' '.join([i for i in corpus.split(' ') if i not in sw])
+		
+			wc = WordCloud(background_color="#0E1117", repeat=False, mask=mask)
+			wc.generate(corpus)
+			col2.image(wc.to_array(), use_column_width = True)
+		
+		
+		
+		
+		
+				
 	
 	
 	
