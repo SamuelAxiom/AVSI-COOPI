@@ -1,0 +1,19 @@
+variable_x	variable_y	description	xtitle	ytitle	legendtitle	title	graphtype	
+B3what 	boys_school_%	Almost all the boys from people who cultivate melons and cabbage are going to school		Pourcentages of boys at school		Pourcentage of boys scholarized according to what crop they grow 	violin	
+B3what 	income	People who cultivate melons and cabbage have higher income		Income		Income of the household according to what crop they grow	violin	
+educ	boys_school_%	Education is a virtuous circle. Those with no education are more likely to not send their children to school		Pourcentages of boys at school		1	violin	
+residency	B1_AcresOwned	IDPs almost never own any land		Acres owned by all family members		Acres owned per residency status	violin	
+B20_AVSI_equip	productivity_increased	Those who received equipments from COOPI are more likely to have seen their productivity increasing	Did you receive equipment from COOPI		Did your productivity increase	Productivity increase and equipment reeceived	bar	
+emergency_water_supply	boys_school_%			Pourcentages of boys at school		Pourcentage of boys scholarized according to whether they received emergency water distribution or not	violin	
+emergency_water_supply	income	While for income the beneficiaries of emergency water supply are similar to the non beneficiary, in terms of%age of boys going to school, this is much different. This could mean that water activities have a positive impact on scholarization. However, this would have to be further enquired.		Income		Income of the household according to whether they received emergency water distribution or not	violin	
+dam 	MultipurposeWSS	It seems that when there has been Multipurpose Water Supply System the dam is getting dry later during the year. I do not know whether this could have any causality... It might just be because it was mainly implemented in Doolow and very few in Baidoa.				2	bar	
+MultipurposeWSS	girls_school_%	It seems that when there has been Multipurpose Water Supply System the girls go more to school. Here again, this does not mean any causality, maybe it could be the fact that this was mainly implemented in Doolow and very few in Baidoa.		Pourcentages of girls at school		3	violin	
+handwashfacility	girls_school_%			Pourcentages of girls at school		4	violin	
+handwashfacility	boys_school_%	It seems that when the project installed handwash facilities the girls and boys go more to school. 		Pourcentages of boys at school		5	violin	
+handwashfacility	income	However we can see that the families with the highest income also 				6	violin	Add here a graph with a colormap of pourcentage of boys and girls going to school
+use_toilet	boys_school_%	Almost none of the boys in family where people do not use toilet go to school				7	violin	
+District	employment					8	bar	
+District	E6_Boreholes_village					9	bar	
+District	educ					10	bar	
+District	income	The situation in Doloow and Baidoa is very different, in Doolow people have better income, more boreholes per village, they are less unemployed and have less often no education				11	violin	
+Times_no_money_D	girls_school_%	Among beneficiary of UCT all those who ran out of money do not have any girls at school.		Pourcentages of girls at school		12	violin	
