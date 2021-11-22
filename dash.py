@@ -26,19 +26,29 @@ st.set_page_config(layout="wide")
 #import des données
 @st.cache
 def load_data():
-	data = pd.read_csv('viz.csv',sep='\t')
-	data.drop([i for i in data if 'Unnamed' in i],axis=1,inplace=True)
-	correl=pd.read_csv('graphs.csv',sep='\t')
-	questions=pd.read_csv('questions.csv',sep='\t')
-	questions.drop([i for i in questions.columns if 'Unnamed' in i],axis=1,inplace=True)
-	quest=questions.iloc[3].to_dict()
-	questions=questions.T
-	sankey=questions[questions[1]=='sankey'].index.tolist()
-	codes=pd.read_csv('codes.csv',index_col=None,sep='\t').dropna(how='any',subset=['color'])
+	coopi = pd.read_csv('viz_coopi.csv',sep='\t')
+	coopi.drop([i for i in coopi if 'Unnamed' in i],axis=1,inplace=True)
+	correl_coopi=pd.read_csv('graphs_coopi.csv',sep='\t')
+	questions_coopi=pd.read_csv('questions_coopi.csv',sep='\t')
+	questions_coopi.drop([i for i in questions_coopi.columns if 'Unnamed' in i],axis=1,inplace=True)
+	quest_coopi=questions_coopi.iloc[3].to_dict()
+	questions_coopi=questions_coopi.T
+	sankey_coopi=questions_coopi[questions_coopi[1]=='sankey'].index.tolist()
+	codes_coopi=pd.read_csv('codes_coopi.csv',index_col=None,sep='\t').dropna(how='any',subset=['color'])
 	
-	return data,correl,quest,codes,sankey
+	avsi = pd.read_csv('viz_avsi.csv',sep='\t')
+	avsi.drop([i for i in avsi if 'Unnamed' in i],axis=1,inplace=True)
+	correl_avsi=pd.read_csv('graphs_avsi.csv',sep='\t')
+	questions_avsi=pd.read_csv('questions_avsi.csv',sep='\t')
+	questions_avsi.drop([i for i in questions_avsi.columns if 'Unnamed' in i],axis=1,inplace=True)
+	quest_avsi=questions_avsi.iloc[3].to_dict()
+	questions_avsi=questions_avsi.T
+	sankey_avsi=questions_avsi[questions_avsi[1]=='sankey'].index.tolist()
+	codes_avsi=pd.read_csv('codes_avsi.csv',index_col=None,sep='\t').dropna(how='any',subset=['color'])
+	
+	return coopi,correl_coopi,quest_coopi,codes_coopi,sankey_coopi,avsi,correl_avsi,quest_avsi,codes_avsi,sankey_avsi
 
-data,correl,questions,codes,sankey=load_data()
+coopi,correl_coopi,questions_coopi,codes_coopi,sankey_coopi,avsi,correl_avsi,questions_avsi,codes_avsi,sankey_avsi=load_data()
 
 #st.write(sankey)
 #st.dataframe(correl)
@@ -126,7 +136,7 @@ def sankey_graph(data,L,height=600,width=1600):
     return fig
 
 
-def count2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
+def count2(abscisse,ordonnée,dataf,codes,legendtitle='',xaxis=''):
 	
 	dataf[ordonnée]=dataf[ordonnée].apply(lambda x:str(x))
 	agg=dataf[[abscisse,ordonnée]].groupby(by=[abscisse,ordonnée]).aggregate({abscisse:'count'}).unstack().fillna(0)
@@ -180,7 +190,7 @@ def count2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
     
 	return fig
 
-def pourcent2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
+def pourcent2(abscisse,ordonnée,dataf,codes,legendtitle='',xaxis=''):
     
 	agg2=dataf[[abscisse,ordonnée]].groupby(by=[abscisse,ordonnée]).aggregate({abscisse:'count'}).unstack().fillna(0)
 	agg=agg2.T/agg2.T.sum()
@@ -229,7 +239,7 @@ def pourcent2(abscisse,ordonnée,dataf,legendtitle='',xaxis=''):
 
 img1 = Image.open("logoAxiom.png")
 img2 = Image.open("logoCOOPI.png")
-#img3 = Image.open("logoAVSI.png")
+img3 = Image.open("logoAvsi.png")
 
 def main():	
 	
@@ -249,9 +259,20 @@ def main():
 		topic = st.sidebar.radio('What do you want to do ?',('Display machine learning results','Display correlations',\
 		'Display Sankey Graphs','Display Wordclouds'))
 		title3.image(img2)
+		data=coopi.copy()
+		correl=correl_coopi.copy()
+		questions=questions_coopi.copy()
+		codes=codes_coopi.copy()
+		sankey=sankey_coopi.copy()
+		
 	elif database=='AVSI':
 		topic = st.sidebar.radio('What do you want to do ?',('Display correlations','Display Sankey Graphs','Display Wordclouds'))
-		#title3.image(img3)
+		title3.image(img3)
+		data=avsi.copy()
+		correl=correl_avsi.copy()
+		questions=questions_avsi.copy()
+		codes=codes_avsi.copy()
+		sankey=sankey_avsi.copy()
 	else:
 		topic=''
 	
@@ -304,10 +325,15 @@ def main():
 	elif topic=='Display correlations':	
 		
 		title1.title('Main correlations uncovered from the database')
-		st.write('Note: There are huge differences between Baidoa and Doloow as shown below. In this regards, the correlations need to be taken carefuly and could sometimes just come from thee fact that the categories are just coming from different regions.')
-		continues=pickle.load( open( "cont_feat.p", "rb" ) )
-		cat_cols=pickle.load( open( "cat_cols.p", "rb" ) )
 		
+		
+		if database=='COOPI':
+			continues=pickle.load( open( "cont_feat_coopi.p", "rb" ) )
+			cat_cols=pickle.load( open( "cat_cols_coopi.p", "rb" ) )
+			st.write('Note: There are huge differences between Baidoa and Doloow as shown below. In this regards, the correlations need to be taken carefuly and could sometimes just come from thee fact that the categories are just coming from different regions.')
+		elif database=='AVSI':
+			continues=pickle.load( open( "cont_feat_avsi.p", "rb" ) )
+			cat_cols=pickle.load( open( "cat_cols_avsi.p", "rb" ) )
 				
 		quests=correl[correl['variable_x'].fillna('').apply(lambda x: True if 'region' not in x else False)]
 		
@@ -449,12 +475,12 @@ def main():
 					col1,col2=st.columns([1,1])
 
 					fig1=count2(quest.iloc[i]['variable_x'],quest.iloc[i]['variable_y'],\
-					df,legendtitle=quest.iloc[i]['legendtitle'],xaxis=quest.iloc[i]['xtitle'])
+					df,codes,legendtitle=quest.iloc[i]['legendtitle'],xaxis=quest.iloc[i]['xtitle'])
 					
 					col1.plotly_chart(fig1,use_container_width=True)
 						
 					fig2=pourcent2(quest.iloc[i]['variable_x'],quest.iloc[i]['variable_y'],\
-					df,legendtitle=quest.iloc[i]['legendtitle'],xaxis=quest.iloc[i]['xtitle'])
+					df,codes,legendtitle=quest.iloc[i]['legendtitle'],xaxis=quest.iloc[i]['xtitle'])
 					#fig2.update_layout(title_text=quest.iloc[i]['title'],font=dict(size=20),showlegend=True,xaxis_tickangle=45)
 					col2.plotly_chart(fig2,use_container_width=True)
 					st.write(quest.iloc[i]['description'])
@@ -465,109 +491,122 @@ def main():
 	
 		
 	elif topic=='Display Sankey Graphs':
-	
-		title1.title('Visuals for questions related to cultures (questions C3 to C17)')
-		st.title('')
 		
+		if database=='COOPI':
 		
-		crops=[i for i in data if i[0]=='B' and i[:3] not in ['B1_','B20','B19']]
-		#st.write(sankey)	
+			title1.title('Visuals for questions related to cultures (questions C3 to C17 and potentially others)')
+			st.title('')
 		
-		data_all=data[sankey].copy()
-		
-		#st.write()
-		
-		rest=[i for i in sankey if i not in crops]
-		sankeyseeds=sankey[:65]
-		sank=data[sankeyseeds]
-		
-		cowpea=data_all[rest+[i for i in crops if 'Cowpea' in i]].copy()
-		sorghum=data_all[rest+[i for i in crops if 'Sorghum' in i]].copy()
-		melon=data_all[rest+[i for i in crops if 'Melon' in i]].copy()
-		maize=data_all[rest+[i for i in crops if 'Maize' in i]].copy()
-		cabbage=data_all[rest+[i for i in crops if 'Cabbage' in i]].copy()
-		tomatoes=data_all[rest+[i for i in crops if 'Tomatoes' in i]].copy()
-		other=data_all[rest+[i for i in crops if 'other' in i]].copy()
-		
-		#st.write(cowpea)
-		
-		colonnes=['Seeds Planted','Type of seeds','Origin of seeds','Did you have adequate/enough seed',\
-          'Origin of fertilizer']
-		for i in [cowpea,sorghum,melon,maize,cabbage,tomatoes,other]:
-    			i.columns=rest+colonnes
-		cowpea=cowpea[cowpea['Seeds Planted']=='Yes']
-		sorghum=sorghum[sorghum['Seeds Planted']=='Yes']
-		melon=melon[melon['Seeds Planted']=='Yes']
-		maize=maize[maize['Seeds Planted']=='Yes']
-		cabbage=cabbage[cabbage['Seeds Planted']=='Yes']
-		tomatoes=tomatoes[tomatoes['Seeds Planted']=='Yes']
-		other=other[other['Seeds Planted']=='Yes']
-		
-		cowpea['Seeds Planted']=cowpea['Seeds Planted'].apply(lambda x: 'Cowpea')
-		sorghum['Seeds Planted']=sorghum['Seeds Planted'].apply(lambda x: 'Sorghum')
-		melon['Seeds Planted']=melon['Seeds Planted'].apply(lambda x: 'Melon')
-		maize['Seeds Planted']=maize['Seeds Planted'].apply(lambda x: 'Maize')
-		cabbage['Seeds Planted']=cabbage['Seeds Planted'].apply(lambda x: 'Cabbage')
-		tomatoes['Seeds Planted']=tomatoes['Seeds Planted'].apply(lambda x: 'Tomatoes')
-		other['Seeds Planted']=other['Seeds Planted'].apply(lambda x: 'Other')
-		
-		sank=pd.DataFrame(columns=rest+colonnes)
-		for i in [cowpea,sorghum,melon,maize,cabbage,tomatoes,other]:
-		    sank=sank.append(i)
-		sank['ones']=np.ones(len(sank))
-		
-		st.title('Some examples')
-		
-		st.markdown("""---""")
-		st.write('Origin of Seeds - Type of Seeds - '+questions['productivity_increased'])
-		fig=sankey_graph(sank,['Origin of seeds','Type of seeds','Type of seeds'],height=600,width=1500)
-		fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
-		
-		st.plotly_chart(fig,use_container_width=True)
-		st.write('We can see that improved seeds and seeds received from AVSI improved the productivity')
-		
-		st.markdown("""---""")
-		st.write(questions['B20_AVSI_equip']+' - '+questions['A15 Agricultural support']+' - '+questions['productivity_increased'])
-		fig=sankey_graph(sank,['B20_AVSI_equip','A15 Agricultural support','productivity_increased'],height=600,width=1500)
-		fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
-		
-		st.plotly_chart(fig,use_container_width=True)
-		st.write('We can see that almost all those who received agricultural support and/or equipments improved the productivity')
-		
-		
-		if st.checkbox('Design my own Sankey Graph'):
 			
+			crops=[i for i in data if i[0]=='B' and i[:3] not in ['B1_','B20','B19']]
+			#st.write(sankey)	
+		
+			data_all=data[sankey].copy()
+		
+			#st.write()
+		
+			rest=[i for i in sankey if i not in crops]
+			sankeyseeds=sankey[:65]
+			sank=data[sankeyseeds]
+		
+			cowpea=data_all[rest+[i for i in crops if 'Cowpea' in i]].copy()
+			sorghum=data_all[rest+[i for i in crops if 'Sorghum' in i]].copy()
+			melon=data_all[rest+[i for i in crops if 'Melon' in i]].copy()
+			maize=data_all[rest+[i for i in crops if 'Maize' in i]].copy()
+			cabbage=data_all[rest+[i for i in crops if 'Cabbage' in i]].copy()
+			tomatoes=data_all[rest+[i for i in crops if 'Tomatoes' in i]].copy()
+			other=data_all[rest+[i for i in crops if 'other' in i]].copy()
+		
+			#st.write(cowpea)
+		
+			colonnes=['Seeds Planted','Type of seeds','Origin of seeds','Did you have adequate/enough seed',\
+        	  'Origin of fertilizer']
+			for i in [cowpea,sorghum,melon,maize,cabbage,tomatoes,other]:
+    				i.columns=rest+colonnes
+			cowpea=cowpea[cowpea['Seeds Planted']=='Yes']
+			sorghum=sorghum[sorghum['Seeds Planted']=='Yes']
+			melon=melon[melon['Seeds Planted']=='Yes']
+			maize=maize[maize['Seeds Planted']=='Yes']
+			cabbage=cabbage[cabbage['Seeds Planted']=='Yes']
+			tomatoes=tomatoes[tomatoes['Seeds Planted']=='Yes']
+			other=other[other['Seeds Planted']=='Yes']
+		
+			cowpea['Seeds Planted']=cowpea['Seeds Planted'].apply(lambda x: 'Cowpea')
+			sorghum['Seeds Planted']=sorghum['Seeds Planted'].apply(lambda x: 'Sorghum')
+			melon['Seeds Planted']=melon['Seeds Planted'].apply(lambda x: 'Melon')
+			maize['Seeds Planted']=maize['Seeds Planted'].apply(lambda x: 'Maize')
+			cabbage['Seeds Planted']=cabbage['Seeds Planted'].apply(lambda x: 'Cabbage')
+			tomatoes['Seeds Planted']=tomatoes['Seeds Planted'].apply(lambda x: 'Tomatoes')
+			other['Seeds Planted']=other['Seeds Planted'].apply(lambda x: 'Other')
+		
+			sank=pd.DataFrame(columns=rest+colonnes)
+			for i in [cowpea,sorghum,melon,maize,cabbage,tomatoes,other]:
+			    sank=sank.append(i)
+			sank['ones']=np.ones(len(sank))
+		
+			st.title('Some examples')
+		
 			st.markdown("""---""")
-			feats=st.multiselect('Select features you want to see in the order you want them to appear', [questions[i] for i in rest]+colonnes)
+			st.write('Origin of Seeds - Type of Seeds - '+questions['productivity_increased'])
+			fig=sankey_graph(sank,['Origin of seeds','Type of seeds','Type of seeds'],height=600,width=1500)
+			fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
 			
-			if len(feats)>=2:
-				st.write(' - '.join(feats))
-				a=False
-				for i in feats:
-					if i in colonnes:
-						a=True
-				if a:
-					df=sank.copy()
-				else:
-					df=data_all
-				
-				features=[]
-				for i in feats:
-					if i in colonnes:
-						features.append(i)
+			st.plotly_chart(fig,use_container_width=True)
+			st.write('We can see that improved seeds and seeds received from AVSI improved the productivity')
+		
+			st.markdown("""---""")
+			st.write(questions['B20_AVSI_equip']+' - '+questions['A15 Agricultural support']+' - '+questions['productivity_increased'])
+			fig=sankey_graph(sank,['B20_AVSI_equip','A15 Agricultural support','productivity_increased'],height=600,width=1500)
+			fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
+			
+			st.plotly_chart(fig,use_container_width=True)
+			st.write('We can see that almost all those who received agricultural support and/or equipments improved the productivity')
+			
+		
+			if st.checkbox('Design my own Sankey Graph'):
+			
+				st.markdown("""---""")
+				feats=st.multiselect('Select features you want to see in the order you want them to appear', [questions[i] for i in rest]+colonnes)
+			
+				if len(feats)>=2:
+					st.write(' - '.join(feats))
+					a=False
+					for i in feats:
+						if i in colonnes:
+							a=True
+					if a:
+						df=sank.copy()
 					else:
-						features.append([n for n in questions if questions[n]==i][0])
+						df=data_all
 				
-				#st.write(features)
+					features=[]
+					for i in feats:
+						if i in colonnes:
+							features.append(i)
+						else:
+							features.append([n for n in questions if questions[n]==i][0])
 				
-				fig3=sankey_graph(df,features,height=600,width=1500)
-				fig3.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
-				st.plotly_chart(fig3,use_container_width=True)
+					#st.write(features)
+				
+					fig3=sankey_graph(df,features,height=600,width=1500)
+					fig3.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
+					st.plotly_chart(fig3,use_container_width=True)
+		
+		if database=='AVSI':
+			pass
 		
 		
-	elif topic=='Display Wordclouds':		
-		continues=pickle.load( open( "cont_feat.p", "rb" ) )
-		text=pickle.load( open( "text.p", "rb" ) )
+		
+	elif topic=='Display Wordclouds':
+		
+		if database=='COOPI':		
+			continues=pickle.load( open( "cont_feat_coopi.p", "rb" ) )
+			text=pickle.load( open( "text_coopi.p", "rb" ) )
+		elif database=='AVSI':		
+			continues=pickle.load( open( "cont_feat_avsi.p", "rb" ) )
+			text=pickle.load( open( "text_avsi.p", "rb" ) )
+		
+		
 		text2=[questions[i] for i in text]
 		
 		#st.write(questions)

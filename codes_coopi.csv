@@ -1,0 +1,46 @@
+Unnamed: 0	list name	type	label	coding	color
+0	gender resp	to code	Female	0.0	pink
+1	gender resp	to code	Male	1.0	blue
+2	educ	to code	Completed primary	1.0	yellow
+3	educ	to code	Some Primary	0.5	orange
+4	educ	to code	No education	0.0	red
+5	educ	to code	Some secondary	1.5	lightgreen
+6	educ	to code	Vocational training	1.5	grey
+7	marital	to code	Married	1.0	white
+8	marital	to code	Other	0.0	grey
+9	marital	to code	Widower	0.0	darkgrey
+10	residency	to code	Host Community	1.0	green
+11	residency	to code	IDP	-1.0	yellow
+12	residency	to code	Returnee	0.0	blue
+13	employment	to code	Unemployed	0.0	yellow
+14	employment	to code	Self-employed	1.0	blue
+15	employment	to code	Employed	1.0	green
+16	A15	cat	CFW		
+17	A15	cat	Unconditional cash transfer		
+18	A15	cat	Water supply		
+19	A15	cat	Training		
+20	A15	cat	Hygiene education		
+21	A15	cat	 Improved sanitation		
+22	A15	cat	Agricultural support		
+23	B3what	cat	Cowpea		
+24	B3what	cat	Sorghum		
+25	B3what	cat	Melons		
+26	B3what	cat	Maize		
+27	B3what	cat	Cabbage		
+28	B3what	cat	Tomatoes		
+29	B3what	cat	other		
+30	B19	cat	Modern agricultural practices		
+31	B19	cat	Harvesting and post-harvesting handling		
+32	B19	cat	Use of agricultural inputs		
+33	B19	cat	Fertilizer application		
+34	B19	cat	Soil erosion control		
+35	B19	cat	Seed production		
+36	B19	cat	Pest management		
+37	District	to code	Baidoa	1.0	blue
+38	District	to code	Doolow	0.0	green
+	E6_Boreholes_village		0	0	red
+	E6_Boreholes_village		1	1	orange
+	E6_Boreholes_village		2	2	yellow
+	E6_Boreholes_village		3	3	lightgreen
+	E6_Boreholes_village		4	4	green
+	E6_Boreholes_village		5	5	darkgreen

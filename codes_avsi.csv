@@ -1,0 +1,63 @@
+list name	type	label	Coding	color
+gender resp	to code	Female	0.0	pink
+gender resp	to code	Male	1.0	blue
+educ	to code	No education	0.0	red
+educ	to code	Some secondary	1.5	lightgreen
+educ	to code	Vocational training	1.5	grey
+educ	to code	Completed primary	1.0	yellow
+educ	to code	Some Primary	0.5	orange
+educ	to code	Completed secondary	2.0	green
+marital	to code	Married	1.0	white
+marital	to code	Other	0.0	grey
+marital	to code	Widower	0.0	black
+marital	to code	Single	0.0	blue
+marital	to code	Divorced	0.0	yellow
+residency	to code	Host Community	1.0	blue
+residency	to code	IDP	-1.0	yellow
+residency	to code	Returnee	0.0	green
+employment	to code	Unemployed	0.0	yellow
+employment	to code	Self-employed	1.0	green
+employment	to code	Employed	1.0	blue
+A15	cat	CFW		
+A15	cat	Unconditional cash transfer		
+A15	cat	Water supply		
+A15	cat	Training		
+A15	cat	Hygiene education		
+A15	cat	 Improved sanitation		
+A15	cat	Agricultural support		
+A15	cat	GBV support		
+B3	cat	Maize		
+B3	cat	Beans		
+B3	cat	Tomatoes		
+B3	cat	other		
+B19	cat	Modern agricultural practices		
+B19	cat	Harvesting and post-harvesting handling		
+B19	cat	Use of agricultural inputs		
+B19	cat	Fertilizer application		
+B19	cat	Soil erosion control		
+B19	cat	Pest management		
+B19	cat	Other training		
+E9_sanitation	to code	Pit latrine	0.5	grey
+E9_sanitation	to code	Bush (in the open place)	0.0	brown
+E9_sanitation	to code	VIP latrine	1.0	blue
+E15	cat	Before preparing meals		
+E15	cat	Before serving food		
+E15	cat	Before eating		
+E15	cat	Before feeding a baby		
+E15	cat	After cleaning the baby of the feaces		
+E15	cat	After using the toilet		
+E15	cat	After handling garbage		
+E15	cat	After playing with children		
+E16_Handwahs_why	to code	To be healthy	1.0	lightgreen
+E16_Handwahs_why	to code	To be clean	0.0	red
+E16_Handwahs_why	to code	To reduces spread/ transmission of disease	1.5	green
+E17_wash_with_what	to code	Water alone	0.0	red
+E17_wash_with_what	to code	With water and soap	2.0	lightgreen
+E17_wash_with_what	to code	With water and ash	1.0	grey
+E17_wash_with_what	to code	With water and sand	1.0	green
+E20	cat	Jerry can		
+E20	cat	Soap		
+E20	cat	towel		
+E20	cat	Underwear		
+E20	cat	Nail cutter/clipper		
+E20	cat	Comb		
