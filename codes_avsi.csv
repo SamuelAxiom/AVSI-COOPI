@@ -1,4 +1,4 @@
-list name	type	label	Coding	color
+list name	type	label	coding	color
 gender resp	to code	Female	0.0	pink
 gender resp	to code	Male	1.0	blue
 educ	to code	No education	0.0	red
@@ -61,3 +61,9 @@ E20	cat	towel
 E20	cat	Underwear		
 E20	cat	Nail cutter/clipper		
 E20	cat	Comb		
+E6_Boreholes_village		0	0	red
+E6_Boreholes_village		1	1	orange
+E6_Boreholes_village		2	2	yellow
+E6_Boreholes_village		3	3	lightgreen
+E6_Boreholes_village		4	4	green
+E6_Boreholes_village		5	5	darkgreen

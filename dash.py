@@ -38,6 +38,7 @@ def load_data():
 	
 	avsi = pd.read_csv('viz_avsi.csv',sep='\t')
 	avsi.drop([i for i in avsi if 'Unnamed' in i],axis=1,inplace=True)
+	avsi['E6_Boreholes_village']=avsi['E6_Boreholes_village'].apply(lambda x:str(x))
 	correl_avsi=pd.read_csv('graphs_avsi.csv',sep='\t')
 	questions_avsi=pd.read_csv('questions_avsi.csv',sep='\t')
 	questions_avsi.drop([i for i in questions_avsi.columns if 'Unnamed' in i],axis=1,inplace=True)
@@ -418,6 +419,8 @@ def main():
 					
 				elif quest.iloc[i]['graphtype']=='violin':
 					
+					#st.write(quest.iloc[i]['variable_x'],quest.iloc[i]['variable_y'])
+					
 					fig = go.Figure()
 				
 					if quest.iloc[i]['variable_x'].split(' ')[0] in codes['list name'].unique():
@@ -426,19 +429,12 @@ def main():
 					else:
 						categs = df[quest.iloc[i]['variable_x']].unique()
 					
-					if quest.iloc[i]['colorcolumns']!=quest.iloc[i]['colorcolumns']:
+					#st.write(categs)
 					
-						for categ in categs:
-						    fig.add_trace(go.Violin(x=df[quest.iloc[i]['variable_x']][df[quest.iloc[i]['variable_x']] == categ],
-		                            		y=df[quest.iloc[i]['variable_y']][df[quest.iloc[i]['variable_x']] == categ],
+					for categ in categs:
+					    fig.add_trace(go.Violin(x=df[quest.iloc[i]['variable_x']][df[quest.iloc[i]['variable_x']] == categ],
+		                         		y=df[quest.iloc[i]['variable_y']][df[quest.iloc[i]['variable_x']] == categ],
 		                            		name=categ,
-		                            		box_visible=True,
-        	                   			meanline_visible=True,points="all",))
-					else: 
-						for categ in categs:
-						    fig.add_trace(go.Violin(x=df[quest.iloc[i]['variable_x']][df[quest.iloc[i]['variable_x']] == categ],
-		                            		y=df[quest.iloc[i]['variable_y']][df[quest.iloc[i]['variable_x']] == categ],
-		                            		name=categ,color='colorcolumns',
 		                            		box_visible=True,
         	                   			meanline_visible=True,points="all",))
 					
