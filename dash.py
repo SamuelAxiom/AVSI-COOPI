@@ -124,7 +124,7 @@ def sankey_graph(data,L,height=600,width=1600):
       pad = 15,
       thickness = 30,
       line = dict(color = "black", width = 1),
-      label = [i.upper() for i in labels],
+      label = [str(i).upper() for i in labels],
       color=color_nodes
       )
       
@@ -275,8 +275,11 @@ def main():
 		codes=codes_avsi.copy()
 		sankey=sankey_avsi.copy()
 	else:
+		col1, col2,col3 = st.columns([2,2,2])
+		col1.image(img3)
+		col2.title('TPM3')
+		col3.image(img2)
 		topic=''
-	
 		
 	
 	if topic=='Display machine learning results':
@@ -589,7 +592,98 @@ def main():
 					st.plotly_chart(fig3,use_container_width=True)
 		
 		if database=='AVSI':
-			pass
+			
+			title1.title('Visuals for questions related to cultures (questions B3 to B19 and potentially others)')
+			st.title('')
+		
+			
+			crops=[i for i in data if i[:3] in ['B15','B9 ','B8 ','B5 ','B4 ','B3 ']]
+			
+			#st.write(crops)
+					
+			data_all=data[sankey].copy()
+		
+			#st.write(data_all)
+		
+			rest=[i for i in sankey if i not in crops]
+			sankeyseeds=sankey[:65]
+			sank=data[sankeyseeds]
+		
+			#st.write(rest)
+			
+			maize=data_all[rest+[i for i in crops if 'maize' in i.lower()]].copy()
+			beans=data_all[rest+[i for i in crops if 'bean' in i.lower()]].copy()
+			tomatoes=data_all[rest+[i for i in crops if 'tom' in i.lower()]].copy()
+			other=data_all[rest+[i for i in crops if 'other' in i.lower()]].copy()
+		
+			#st.write(maize.shape)
+			#st.write(beans.shape)
+			#st.write(tomatoes.shape)
+			#st.write(other.shape)
+		
+			colonnes=['Seeds Planted','Type of seeds','Origin of seeds','Did you have adequate/enough seed',\
+        	  'Origin of fertilizer', 'Number of fertilizer distribution received from AVSI']
+			for i in [maize,beans,tomatoes,other]:
+    				i.columns=rest+colonnes
+			
+			maize=maize[maize['Seeds Planted']=='Yes']
+			beans=beans[beans['Seeds Planted']=='Yes']
+			tomatoes=tomatoes[tomatoes['Seeds Planted']=='Yes']
+			other=other[other['Seeds Planted']!='0']
+		
+			maize['Seeds Planted']=maize['Seeds Planted'].apply(lambda x: 'Maize')
+			beans['Seeds Planted']=beans['Seeds Planted'].apply(lambda x: 'Beans')
+			tomatoes['Seeds Planted']=tomatoes['Seeds Planted'].apply(lambda x: 'Tomatoes')
+			other['Seeds Planted']=other['Seeds Planted'].apply(lambda x: 'Other')
+			
+			#st.write(other)	
+			
+			sank=pd.DataFrame(columns=rest+colonnes)
+			for i in [maize,beans,tomatoes,other]:
+			    sank=sank.append(i)
+			sank['ones']=np.ones(len(sank))
+		
+			st.title('Example: You can visualize what you want below by ticking the box under the graph')
+		
+			st.markdown("""---""")
+			st.write('Seeds Planted - Origin of Seeds - Type of Seeds - Enough seeds - Residency Status')
+			fig=sankey_graph(sank,['Seeds Planted','Origin of seeds','Type of seeds','Did you have adequate/enough seed','residency'],height=600,width=1500)
+			fig.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
+			
+			st.plotly_chart(fig,use_container_width=True)
+			st.write('We can see that recycled seeds generally not of adequate quantity/quality and that globally IDPs and Returnees seems to be less satisfied by the quality/quantity received than hosts.')
+		
+			
+			
+		
+			if st.checkbox('Design my own Sankey Graph'):
+			
+				st.markdown("""---""")
+				feats=st.multiselect('Select features you want to see in the order you want them to appear', [questions[i] for i in rest]+colonnes)
+			
+				if len(feats)>=2:
+					st.write(' - '.join(feats))
+					a=False
+					for i in feats:
+						if i in colonnes:
+							a=True
+					if a:
+						df=sank.copy()
+					else:
+						df=data_all
+				
+					features=[]
+					for i in feats:
+						if i in colonnes:
+							features.append(i)
+						else:
+							features.append([n for n in questions if questions[n]==i][0])
+				
+					#st.write(features)
+				
+					fig3=sankey_graph(df,features,height=600,width=1500)
+					fig3.update_layout(plot_bgcolor='black', paper_bgcolor='grey', width=1500)
+					st.plotly_chart(fig3,use_container_width=True)
 		
 		
 		
